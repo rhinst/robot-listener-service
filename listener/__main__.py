@@ -7,26 +7,22 @@ import json
 
 from redis import Redis
 from redis.client import PubSub
-from speech_recognition import Microphone, Recognizer, AudioData, UnknownValueError
+from speech_recognition import Microphone, Recognizer, AudioData, UnknownValueError, AudioSource
 
 from listener.config import load_config
 from listener.logging import logger, initialize_logger
 from listener.microphone import get_microphone
 
 
-def on_record_timed(message: Dict, microphone: Microphone, recognizer: Recognizer) -> AudioData:
+def on_record_timed(message: Dict, source: AudioSource, recognizer: Recognizer) -> AudioData:
     duration = message['duration']
     logger.debug(f"Recording {duration}s of audio")
-    with microphone as source:
-        recognizer.adjust_for_ambient_noise(microphone)
-        return recognizer.record(source, duration=float(duration))
+    return recognizer.record(source, duration=float(duration))
 
 
-def on_record_phrase(message, microphone: Microphone, recognizer: Recognizer) -> AudioData:
+def on_record_phrase(message, source: AudioSource, recognizer: Recognizer) -> AudioData:
     logger.debug("Listening for a phrase")
-    with microphone as source:
-        recognizer.adjust_for_ambient_noise(microphone)
-        return recognizer.listen(source, phrase_time_limit=10)
+    return recognizer.listen(source, phrase_time_limit=10)
 
 
 def transcribe(audio: AudioData, recognizer: Recognizer) -> str:
@@ -53,14 +49,25 @@ def main():
         "timed": on_record_timed,
         "phrase": on_record_phrase
     }
-    microphone = get_microphone(config['microphone']['name'])
+    microphone_name = config['microphone']['name']
+    logger.debug(f"Listening on {microphone_name}")
+    microphone = get_microphone(microphone_name)
     recognizer = Recognizer()
+    redis_client.publish("subsystem.listener.state", "idle")
     try:
         while cycle([True]):
             # see if there is a command for me to execute
             if redis_message := pubsub.get_message():
                 cmd_message = json.loads(redis_message['data'])
-                audio = handlers[cmd_message['mode']](cmd_message, microphone, recognizer)
+                with microphone as source:
+                    redis_client.publish("subsystem.listener.state", "normalizing")
+                    logger.debug("Adjusting for ambient noise")
+                    recognizer.adjust_for_ambient_noise(source)
+                    redis_client.publish("subsystem.listener.state", "recording")
+                    audio = handlers[cmd_message['mode']](cmd_message, source, recognizer)
+                    redis_client.publish("subsystem.listener.state", "processing")
+                wav_data = audio.get_wav_data()
+                logger.debug(f"Captured {len(wav_data)} bytes of audio")
                 f = NamedTemporaryFile(delete=False, mode="wb")
                 f.write(audio.get_wav_data())
                 f.close()
@@ -75,7 +82,8 @@ def main():
                 if transcription:
                     logger.debug(f"Transcription was '{transcription}'")
                 redis_client.publish("subsystem.listener.recording", json.dumps(out_message))
-            sleep(0.1)
+                os.unlink(f.name)
+                redis_client.publish("subsystem.listener.state", "idle")
     except Exception:
         logger.exception("Something bad happened")
     finally:
