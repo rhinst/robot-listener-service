@@ -1,0 +1,11 @@
+[Unit]
+Description=Robot Listener Service
+After=redis-server.service
+
+[Service]
+Type=simple
+WorkingDirectory=/robot/listener
+ExecStart=/robot/motor/venv/bin/listener
+
+[Install]
+WantedBy=multi-user.target
