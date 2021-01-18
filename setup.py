@@ -18,7 +18,7 @@ setup(
   install_requires = [
     'redis==3.5.3',
     'himl==0.7.0',
-    'SpeechRecognition==3.8.1',
+    'pocketsphinx==0.1.15',
     'pyaudio==0.2.11'
   ],
   test_suite='tests',
