@@ -13,6 +13,13 @@ from listener.logging import logger, initialize_logger
 MODELDIR = os.path.join(os.path.dirname(__file__), "../model")
 
 
+def get_microphone_index(audio: pyaudio.PyAudio, name: str) -> int:
+    for i in range(audio.get_device_count()):
+        dev = audio.get_device_info_by_index(i)
+        if dev["name"].lower() == name.lower():
+            return i
+
+
 def main():
     environment: str = os.getenv("ENVIRONMENT", "dev")
     config: Dict = load_config(environment)
@@ -42,7 +49,7 @@ def main():
         rate=16000,
         input=True,
         frames_per_buffer=1024,
-        input_device_index=config["microphone"]["card_index"],
+        input_device_index=get_microphone_index(audio, config["microphone"]["name"]),
     )
     stream.start_stream()
 

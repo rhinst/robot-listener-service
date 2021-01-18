@@ -5,4 +5,4 @@ redis:
   host: "localhost"
   port: 6379
 microphone:
-  card_number: 0
+  name: "default"
