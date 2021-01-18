@@ -34,6 +34,8 @@ def main():
 
     logger.debug("Initializing PyAudio interface")
     audio = pyaudio.PyAudio()
+    microphone_index = get_microphone_index(audio, config["microphone"]["name"])
+    logger.debug(f"Using microphone device '{config['microphone']['name']}' (card index {microphone_index})")
     logger.debug(f"Intializing pocketsphinx Decoder using model dir {MODELDIR}")
     decoder_config: DecoderConfig = Decoder.default_config()
     decoder_config.set_string("-hmm", os.path.join(MODELDIR, "en-us/en-us"))
@@ -50,7 +52,7 @@ def main():
         rate=16000,
         input=True,
         frames_per_buffer=1024,
-        input_device_index=get_microphone_index(audio, config["microphone"]["name"]),
+        input_device_index=microphone_index
     )
     stream.start_stream()
 
