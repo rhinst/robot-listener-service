@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 import platform
+from glob import glob
 
 
 setup(
@@ -11,11 +12,11 @@ setup(
   author_email='rob@hinst.net',
   license='MIT',
   packages=find_packages(),
-  data_files = [
-    ('config', ['config/default.yaml']),
-    ('config/dev', ['config/dev/env.yaml.dist']),
+  data_files=[
+    ('config', glob('config/*', recursive=True)),
+    ('model', glob('model/*', recursive=True))
   ],
-  install_requires = [
+  install_requires=[
     'redis==3.5.3',
     'himl==0.7.0',
     'pocketsphinx==0.1.15',
