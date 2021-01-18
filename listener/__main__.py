@@ -5,6 +5,7 @@ from typing import Dict
 from redis import Redis
 import pyaudio
 from pocketsphinx.pocketsphinx import Decoder
+from sphinxbase.sphinxbase import Config as DecoderConfig
 
 from listener.config import load_config
 from listener.logging import logger, initialize_logger
@@ -33,8 +34,8 @@ def main():
 
     logger.debug("Initializing PyAudio interface")
     audio = pyaudio.PyAudio()
-    logger.debug("Intializing pocketsphinx Decoder")
-    decoder_config = Decoder.default_config()
+    logger.debug(f"Intializing pocketsphinx Decoder using model dir {MODELDIR}")
+    decoder_config: DecoderConfig = Decoder.default_config()
     decoder_config.set_string("-hmm", os.path.join(MODELDIR, "en-us/en-us"))
     decoder_config.set_string("-lm", os.path.join(MODELDIR, "en-us/en-us.lm.bin"))
     decoder_config.set_string(
