@@ -17,8 +17,11 @@ MODELDIR = os.path.join(os.path.dirname(__file__), "../model")
 def get_microphone_index(audio: pyaudio.PyAudio, name: str) -> int:
     for i in range(audio.get_device_count()):
         dev = audio.get_device_info_by_index(i)
-        if dev["name"].lower() == name.lower():
-            return i
+        if dev["name"].lower() != name.lower():
+            logger.debug(f"Skipping audio device '{dev['name']}' (index {i})")
+            continue
+        logger.debug(f"Using audio device '{dev['name']}' (index {i})")
+        return i
 
 
 def main():
