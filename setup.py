@@ -10,6 +10,7 @@ setup(
     author_email='rob@hinst.net',
     license='MIT',
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         'redis==3.5.3',
         'himl==0.7.0',
