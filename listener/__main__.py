@@ -11,7 +11,7 @@ from listener.config import load_config
 from listener.logging import logger, initialize_logger
 
 
-MODELDIR = os.path.join(os.path.dirname(__file__), "../model")
+MODELDIR = os.path.join(os.path.dirname(__file__), "model")
 
 
 def get_microphone_index(audio: pyaudio.PyAudio, name: str) -> int:
@@ -52,9 +52,9 @@ def main():
     stream = audio.open(
         format=pyaudio.paInt16,
         channels=1,
-        rate=16000,
+        rate=44100,
         input=True,
-        frames_per_buffer=1024,
+        frames_per_buffer=2048,
         input_device_index=microphone_index
     )
     stream.start_stream()
@@ -65,7 +65,7 @@ def main():
     try:
         logger.debug("Starting decoder loop")
         while cycle([True]):
-            buf = stream.read(1024)
+            buf = stream.read(2048)
             if buf:
                 logger.debug("Decoding raw audio")
                 decoder.process_raw(buf, False, False)
