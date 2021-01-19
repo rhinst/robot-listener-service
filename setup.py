@@ -5,11 +5,7 @@ from glob import glob
 
 
 def data_files(directory):
-    paths = []
-    for (path, directories, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join(path, filename))
-    return paths
+    return directory, [file for file in glob(f"directory/**/*", recursive=True) if os.path.isfile(file)]
 
 
 setup(
@@ -22,8 +18,8 @@ setup(
     license='MIT',
     packages=find_packages(),
     data_files=[
-        ('config', data_files('config')),
-        ('model', data_files('model')),
+        data_files('config'),
+        data_files('model')
     ],
     install_requires=[
         'redis==3.5.3',
