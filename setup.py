@@ -5,7 +5,7 @@ from glob import glob
 
 
 def data_files(directory):
-    return directory, [file for file in glob(f"directory/**/*", recursive=True) if os.path.isfile(file)]
+    return directory, [file for file in glob(f"directory/*") if os.path.isfile(file)]
 
 
 setup(
@@ -19,7 +19,10 @@ setup(
     packages=find_packages(),
     data_files=[
         data_files('config'),
-        data_files('model')
+        data_files('config/dev'),
+        data_files('model'),
+        data_files('model/en-us'),
+        data_files('model/en-us/en-us')
     ],
     install_requires=[
         'redis==3.5.3',
