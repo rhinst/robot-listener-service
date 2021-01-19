@@ -1,2 +1,0 @@
-recursive-include config *
-recursive-include model *

@@ -16,6 +16,7 @@ setup(
         'pocketsphinx==0.1.15',
         'pyaudio==0.2.11'
     ],
+    setup_requires=['setuptools_scm'],
     test_suite='tests',
     tests_require=['pytest==6.2.1'],
     entry_points={
