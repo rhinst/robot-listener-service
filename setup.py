@@ -12,8 +12,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     data_files=[
-        ('config', 'config/default.yaml'),
-        ('config/dev', 'config/dev/env.yaml.dist')
+        ('config', ['config/default.yaml']),
+        ('config/dev', ['config/dev/env.yaml.dist'])
     ],
     install_requires=[
         'redis==3.5.3',
